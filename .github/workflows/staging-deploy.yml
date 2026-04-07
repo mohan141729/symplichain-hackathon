@@ -1,1 +1,41 @@
 
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Backend Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Frontend Dependencies
+        run: npm install
+
+      - name: Build Frontend
+        run: npm run build
+
+      - name: Upload to S3 (Staging)
+        run: aws s3 sync build/ s3://your-staging-bucket
+
+      - name: Deploy Backend to EC2 (Staging)
+        uses: appleboy/ssh-action@v0.1.0
+        with:
+          host: ${{ secrets.STAGING_EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.STAGING_EC2_KEY }}
+          script: |
+            cd app
+            git pull
+            pip install -r requirements.txt
+            python manage.py migrate
+            sudo systemctl restart gunicorn
+            sudo systemctl restart celery

@@ -19,11 +19,12 @@ def process_fairly():
         request = pop_request(customer)
         if request:
             send_to_external_api(request)
+
+
+---
 ## 🔹 Part 2: Mobile Architecture
 
 ### App Architecture
-
----
 
 ### Tech Stack
 
